@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Mood Music Player</title>
+
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg,#10102c,#30265e,#754b87);
+  color: white;
+  font-family: Arial,sans-serif;
+  text-align: center;
+  overflow-x: hidden;
+}
+
+/* WELCOME PAGE */
+
+#welcomePage {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background:
+    radial-gradient(circle at top,#754b87,transparent 50%),
+    linear-gradient(135deg,#10102c,#30265e,#754b87);
+
+  text-align: center;
+}
+
+.welcome-content {
+  padding: 30px 20px;
+  animation: welcomeFade 1.5s ease;
+}
+
+.music-icon {
+  font-size: 85px;
+  animation: musicBounce 2s infinite;
+}
+
+.welcome-content h1 {
+  font-size: 38px;
+  letter-spacing: 4px;
+  color: #e6caff;
+}
+
+.welcome-content h2 {
+  color: white;
+  font-size: 21px;
+}
+
+.welcome-content p {
+  color: #ddd;
+  line-height: 2;
+  margin: 25px 0;
+}
+
+.welcome-content button {
+  padding: 16px 30px;
+  font-size: 15px;
+  background: #c99cff;
+  border-radius: 35px;
+  box-shadow: 0 0 20px #c99cff66;
+}
+
+.welcome-footer {
+  margin-top: 40px;
+  color: #d5b8ed;
+  letter-spacing: 3px;
+  font-size: 11px;
+}
+
+@keyframes musicBounce {
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes welcomeFade {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* MAIN PAGE */
+
+.container {
+  max-width: 650px;
+  margin: auto;
+  padding: 30px 20px;
+}
+
+h1 {
+  color: #e6caff;
+  font-size: 30px;
+}
+
+.subtitle {
+  color: #ccc;
+  line-height: 1.6;
+}
+
+.card {
+  background: rgba(255,255,255,0.10);
+  padding: 20px;
+  border-radius: 18px;
+  margin-top: 22px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.camera-box {
+  margin: 25px auto;
+  width: 100%;
+  max-width: 420px;
+  background: #191933;
+  padding: 12px;
+  border-radius: 20px;
+}
+
+video {
+  width: 100%;
+  border-radius: 15px;
+  transform: scaleX(-1);
+}
+
+button {
+  background: #c99cff;
+  color: #201536;
+  border: none;
+  padding: 13px 22px;
+  border-radius: 25px;
+  margin: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #e3c5ff;
+}
+
+.mood {
+  font-size: 55px;
+  margin: 15px;
+}
+
+#status {
+  color: #e6caff;
+  margin: 15px;
+  line-height: 1.6;
+}
+
+input, select {
+  padding: 12px;
+  margin: 10px;
+  border-radius: 10px;
+  max-width: 100%;
+  border: none;
+}
+
+select {
+  background: white;
+  color: #201536;
+}
+
+audio {
+  width: 100%;
+  margin-top: 15px;
+}
+
+.song-info {
+  color: #ddd;
+  overflow-wrap: anywhere;
+}
+
+.note {
+  font-size: 12px;
+  color: #bbb;
+  line-height: 1.7;
+  margin-top: 25px;
+}
+
+.footer {
+  margin-top: 40px;
+  color: #d5b8ed;
+  font-size: 13px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<!-- WELCOME PAGE -->
+
+<div id="welcomePage">
+
+  <div class="welcome-content">
+
+    <div class="music-icon">🎵</div>
+
+    <h1>AI MOOD MUSIC</h1>
+
+    <h2>Welcome to Your Music World</h2>
+
+    <p>
+      Every mood has a melody.<br>
+      Let your expressions choose your music.
+    </p>
+
+    <button onclick="enterWebsite()">
+      ENTER MUSIC WORLD 🎧
+    </button>
+
+    <div class="welcome-footer">
+      MUSIC • MOOD • MEMORIES
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- MAIN WEBSITE -->
+
+<div class="container" id="mainPage">
+
+<h1>🎵 AI MOOD MUSIC</h1>
+
+<p class="subtitle">
+Your mood, your music.<br>
+Let AI choose a song for you.
+</p>
+
+
+<!-- CAMERA -->
+
+<div class="camera-box">
+
+<video id="video" autoplay muted playsinline></video>
+
+</div>
+
+<button onclick="startCamera()">
+📷 Start Camera
+</button>
+
+<button onclick="stopCamera()">
+Stop Camera
+</button>
+
+
+<!-- MOOD DETECTION -->
+
+<div class="card">
+
+<h2>Detected Mood</h2>
+
+<div class="mood" id="moodEmoji">🔍</div>
+
+<h3 id="moodText">Waiting for camera...</h3>
+
+<p id="status">Camera is off</p>
+
+</div>
+
+
+<!-- ADD SONGS -->
+
+<div class="card">
+
+<h2>🎧 Add Your Songs</h2>
+
+<p>Select a mood and upload your songs.</p>
+
+<select id="songMood">
+
+<option value="happy">😊 Happy</option>
+
+<option value="sad">😢 Sad</option>
+
+<option value="angry">😡 Angry</option>
+
+<option value="surprised">😮 Surprised</option>
+
+</select>
+
+<br>
+
+<input
+type="file"
+id="songFiles"
+accept="audio/*"
+multiple
+>
+
+<br>
+
+<button onclick="saveSongs()">
+Save Songs 💾
+</button>
+
+<p id="saveStatus"></p>
+
+</div>
+
+
+<!-- MUSIC PLAYER -->
+
+<div class="card">
+
+<h2>🎶 Now Playing</h2>
+
+<h3 id="songName">No song selected</h3>
+
+<p class="song-info" id="songMoodInfo">
+Waiting for mood detection
+</p>
+
+<audio id="audio" controls></audio>
+
+<br>
+
+<button onclick="nextSong()">
+⏭️ Next Song
+</button>
+
+</div>
+
+
+<p class="note">
+
+Only four moods are supported:
+Happy, Sad, Angry and Surprised.
+
+Facial expressions are estimates, not proof
+of someone's actual feelings.
+
+Camera processing happens in your browser.
+Songs are stored locally in your browser.
+
+</p>
+
+<div class="footer">
+AI MOOD MUSIC PLAYER 🎵
+</div>
+
+</div>
+
+
+<script>
+
+// WELCOME PAGE
+
+function enterWebsite() {
+
+  document.getElementById("welcomePage").style.display = "none";
+
+}
+
+
+// VARIABLES
+
+const video = document.getElementById("video");
+
+const audio = document.getElementById("audio");
+
+let stream = null;
+
+let db = null;
+
+let detecting = false;
+
+let modelLoaded = false;
+
+let currentMood = "";
+
+let currentSongs = [];
+
+let currentIndex = 0;
+
+let lastMood = "";
+
+let history = [];
+
+let audioURL = null;
+
+
+// MOOD DATA
+
+const moodData = {
+
+  happy: {
+    emoji: "😊",
+    text: "Happy Mood"
+  },
+
+  sad: {
+    emoji: "😢",
+    text: "Sad Mood"
+  },
+
+  angry: {
+    emoji: "😡",
+    text: "Angry Mood"
+  },
+
+  surprised: {
+    emoji: "😮",
+    text: "Surprised Mood"
+  }
+
+};
+
+
+// DETECTION SETTINGS
+
+const thresholds = {
+
+  happy: 0.50,
+
+  sad: 0.30,
+
+  angry: 0.45,
+
+  surprised: 0.50
+
+};
+
+
+// DATABASE
+
+async function openDatabase() {
+
+  return new Promise((resolve,reject) => {
+
+    let request = indexedDB.open("MoodMusicDB",1);
+
+    request.onupgradeneeded = function(e) {
+
+      let database = e.target.result;
+
+      database.createObjectStore("songs", {
+        keyPath: "id",
+        autoIncrement: true
+      });
+
+    };
+
+    request.onsuccess = function(e) {
+
+      resolve(e.target.result);
+
+    };
+
+    request.onerror = function() {
+
+      reject(request.error);
+
+    };
+
+  });
+
+}
+
+
+// ENTER PAGE DATABASE INIT
+
+async function initializeDatabase() {
+
+  try {
+
+    db = await openDatabase();
+
+  } catch(error) {
+
+    console.error(error);
+
+    document.getElementById("saveStatus").innerText =
+      "Database unavailable.";
+
+  }
+
+}
+
+
+// SAVE SONGS
+
+async function saveSongs() {
+
+  try {
+
+    if (!db) {
+
+      db = await openDatabase();
+
+    }
+
+    const files =
+      document.getElementById("songFiles").files;
+
+    const mood =
+      document.getElementById("songMood").value;
+
+    if (!files.length) {
+
+      alert("Please select songs first!");
+
+      return;
+
+    }
+
+    const transaction =
+      db.transaction("songs","readwrite");
+
+    const store =
+      transaction.objectStore("songs");
+
+    for (let file of files) {
+
+      if (!file.type.startsWith("audio/")) {
+        continue;
+      }
+
+      store.add({
+
+        name: file.name,
+
+        mood: mood,
+
+        file: file
+
+      });
+
+    }
+
+    transaction.oncomplete = function() {
+
+      document.getElementById("saveStatus").innerText =
+        "Songs saved successfully! 🎵";
+
+      document.getElementById("songFiles").value = "";
+
+    };
+
+    transaction.onerror = function() {
+
+      alert("Unable to save songs.");
+
+    };
+
+  } catch(error) {
+
+    alert("Database error: " + error.message);
+
+  }
+
+}
+
+
+// GET SONGS
+
+async function getSongs(mood) {
+
+  if (!db) {
+
+    db = await openDatabase();
+
+  }
+
+  return new Promise((resolve,reject) => {
+
+    const transaction =
+      db.transaction("songs","readonly");
+
+    const store =
+      transaction.objectStore("songs");
+
+    const request = store.getAll();
+
+    request.onsuccess = function() {
+
+      const songs = request.result.filter(song =>
+        song.mood === mood
+      );
+
+      resolve(songs);
+
+    };
+
+    request.onerror = function() {
+
+      reject(request.error);
+
+    };
+
+  });
+
+}
+
+
+// PLAY SONG
+
+async function playMoodMusic(mood) {
+
+  try {
+
+    const songs = await getSongs(mood);
+
+    if (!songs.length) {
+
+      currentSongs = [];
+
+      document.getElementById("songName").innerText =
+        "No songs added for " + mood;
+
+      document.getElementById("songMoodInfo").innerText =
+        "Add songs for this mood.";
+
+      return;
+
+    }
+
+    currentSongs = songs;
+
+    currentIndex = 0;
+
+    playCurrentSong();
+
+  } catch(error) {
+
+    console.error(error);
+
+  }
+
+}
+
+
+// CURRENT SONG
+
+function playCurrentSong() {
+
+  if (!currentSongs.length) return;
+
+  const song = currentSongs[currentIndex];
+
+  if (audioURL) {
+
+    URL.revokeObjectURL(audioURL);
+
+  }
+
+  audioURL = URL.createObjectURL(song.file);
+
+  audio.src = audioURL;
+
+  document.getElementById("songName").innerText =
+    song.name;
+
+  document.getElementById("songMoodInfo").innerText =
+    "Mood: " + song.mood.toUpperCase();
+
+  audio.play().catch(() => {
+
+    document.getElementById("status").innerText =
+      "Press Play to start music.";
+
+  });
+
+}
+
+
+// NEXT SONG
+
+function nextSong() {
+
+  if (!currentSongs.length) return;
+
+  currentIndex++;
+
+  if (currentIndex >= currentSongs.length) {
+
+    currentIndex = 0;
+
+  }
+
+  playCurrentSong();
+
+}
+
+
+// AUTO NEXT SONG
+
+audio.addEventListener("ended", function() {
+
+  nextSong();
+
+});
+
+
+// MOOD CLASSIFICATION
+
+function classifyMood(expressions) {
+
+  const scores = {
+
+    happy: expressions.happy || 0,
+
+    sad: expressions.sad || 0,
+
+    angry: expressions.angry || 0,
+
+    surprised: expressions.surprised || 0
+
+  };
+
+
+  // Increase sensitivity for sad detection
+
+  scores.sad *= 1.30;
+
+
+  const candidates = Object.entries(scores)
+
+    .filter(([mood,score]) => {
+
+      return score >= thresholds[mood];
+
+    })
+
+    .sort((a,b) => b[1] - a[1]);
+
+
+  if (!candidates.length) {
+
+    return "uncertain";
+
+  }
+
+  return candidates[0][0];
+
+}
+
+
+// LOAD AI MODELS
+
+async function loadModels() {
+
+  if (modelLoaded) return;
+
+  const MODEL_URL =
+    "https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights";
+
+  await faceapi.nets.tinyFaceDetector.loadFromUri(
+    MODEL_URL
+  );
+
+  await faceapi.nets.faceExpressionNet.loadFromUri(
+    MODEL_URL
+  );
+
+  modelLoaded = true;
+
+}
+
+
+// START CAMERA
+
+async function startCamera() {
+
+  try {
+
+    if (stream) return;
+
+    document.getElementById("status").innerText =
+      "Loading AI models...";
+
+    await loadModels();
+
+    stream = await navigator.mediaDevices.getUserMedia({
+
+      video: {
+
+        facingMode: "user",
+
+        width: { ideal: 1280 },
+
+        height: { ideal: 720 }
+
+      },
+
+      audio: false
+
+    });
+
+    video.srcObject = stream;
+
+    await video.play();
+
+    history = [];
+
+    lastMood = "";
+
+    document.getElementById("status").innerText =
+      "Camera started. Detecting mood...";
+
+    detectMood();
+
+  } catch(error) {
+
+    document.getElementById("status").innerText =
+      "Camera error: " + error.message;
+
+  }
+
+}
+
+
+// MOOD DETECTION
+
+async function detectMood() {
+
+  if (detecting) return;
+
+  detecting = true;
+
+  try {
+
+    while (stream && stream.active) {
+
+      if (video.readyState >= 2) {
+
+        const result = await faceapi
+
+          .detectSingleFace(
+
+            video,
+
+            new faceapi.TinyFaceDetectorOptions({
+
+              inputSize: 416,
+
+              scoreThreshold: 0.4
+
+            })
+
+          )
+
+          .withFaceExpressions();
+
+
+        if (result) {
+
+          const expressions = result.expressions;
+
+          const detectedMood =
+            classifyMood(expressions);
+
+
+          history.push(detectedMood);
+
+
+          if (history.length > 7) {
+
+            history.shift();
+
+          }
+
+
+          const counts = {};
+
+          history.forEach(mood => {
+
+            counts[mood] =
+              (counts[mood] || 0) + 1;
+
+          });
+
+
+          let finalMood = Object.entries(counts)
+
+            .sort((a,b) => b[1] - a[1])[0][0];
+
+
+          if (
+
+            finalMood !== "uncertain" &&
+
+            counts[finalMood] >= 4
+
+          ) {
+
+            document.getElementById("moodEmoji").innerText =
+              moodData[finalMood].emoji;
+
+            document.getElementById("moodText").innerText =
+              moodData[finalMood].text;
+
+            document.getElementById("status").innerText =
+              "Mood detected successfully!";
+
+            currentMood = finalMood;
+
+
+            if (finalMood !== lastMood) {
+
+              lastMood = finalMood;
+
+              await playMoodMusic(finalMood);
+
+            }
+
+          } else {
+
+            document.getElementById("moodEmoji").innerText =
+              "🔍";
+
+            document.getElementById("moodText").innerText =
+              "Analyzing expression...";
+
+            document.getElementById("status").innerText =
+              "Waiting for a consistent expression.";
+
+          }
+
+        } else {
+
+          history = [];
+
+          document.getElementById("moodEmoji").innerText =
+            "📷";
+
+          document.getElementById("moodText").innerText =
+            "No Face Detected";
+
+          document.getElementById("status").innerText =
+            "Please face the camera.";
+
+        }
+
+      }
+
+      await new Promise(resolve =>
+        setTimeout(resolve,700)
+      );
+
+    }
+
+  } catch(error) {
+
+    console.error(error);
+
+    document.getElementById("status").innerText =
+      "Detection error.";
+
+  } finally {
+
+    detecting = false;
+
+  }
+
+}
+
+
+// STOP CAMERA
+
+function stopCamera() {
+
+  if (stream) {
+
+    stream.getTracks().forEach(track => {
+
+      track.stop();
+
+    });
+
+    stream = null;
+
+  }
+
+  history = [];
+
+  lastMood = "";
+
+  currentMood = "";
+
+  video.srcObject = null;
+
+  document.getElementById("status").innerText =
+    "Camera stopped.";
+
+  document.getElementById("moodText").innerText =
+    "Camera is off";
+
+  document.getElementById("moodEmoji").innerText =
+    "📷";
+
+}
+
+
+// INITIALIZE
+
+initializeDatabase();
+
+</script>
+
+</body>
+</html>
